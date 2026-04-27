@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Bars3Icon,MagnifyingGlassIcon,UserIcon } from "@heroicons/react/24/outline";
 
 const ChatList = ({ activeChat , setActiveChat}) => {
 const navigate = useNavigate()
@@ -37,11 +38,13 @@ const userDummyData = [
 
   return (
     <div className={`bg-violet-200 border-gray-600 border-r h-full p-5 ${activeChat? 'hidden md:block' : ''}`}>
-        <div className='flex flex-col gap-5'>
+        {/* Header */}
+        <div className='flex flex-col gap-1'>
             <div className='flex justify-between items-center'>
                 <h1 className='bg-red-800'>Chat List</h1>
                 <div className='relative py-2 group'>
-                    <h2 className='cursor-pointer max-h-5 '>menu</h2>
+                    {/* <h2 className='cursor-pointer max-h-5 '>menu</h2> */}
+                    <Bars3Icon className="h-6 w-6 text-black" />
                     <div className='absolute top-full right-0 z-20 w-32 p-5 rounded-md bg-[#282142] border border-gray-600 hidden group-hover:block text-gray-100'>
                         <p onClick={() => navigate('/profile')} className='cursor-pointer text-sm'>Edit Profile</p>
                         <hr className='my-2 border-t border-gray-400' />
@@ -50,14 +53,15 @@ const userDummyData = [
                 </div>
             </div>
             <div className='bg-red-800 rounded-full flex items-center gap-2 py-3 px-4 mt-5'>
-                <img src='' alt='search' className='w-3' />
+                <MagnifyingGlassIcon className="h-5 w-5 text-black" />
                 <input type='text' placeholder='Search' className='bg-transparent border-none outline-none text-white text-xs placeholder-[#c8c8c8]flex-1' />
             </div>
         </div>
+        {/* Chat List */}
         <div className='flex flex-col'>
             {userDummyData.map((user, index) => (
                 <div onClick={()=>{setActiveChat(user)}} key={index} className={`relative flex items-center gap-2 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${activeChat?.id === user.id && 'bg-[#282142]/50'}`}>
-                    <img src = {user.avatar || 'https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png'} alt="" className='w-[35px] aspect-[1/1] rounded-full' />
+                    <UserIcon className="h-8 w-8 text-black" />
                     <div className='flex flex-col leading-5'>
                         <p>{user.name}</p>
                         {

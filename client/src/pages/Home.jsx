@@ -9,7 +9,7 @@ const Home = () => {
 
   return (
     <div className='border w-full h-screen'>
-    <div className={`h-full overflow-hidden bg-violet-200 grid grid-cols-1 ${activeChat? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+        <div className={`h-full overflow-hidden  grid grid-cols-4 ${activeChat? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
             <ChatList activeChat={activeChat} setActiveChat={setActiveChat} />
             <ChatContainer activeChat={activeChat} setActiveChat={setActiveChat}/>
             <RightSidebar activeChat={activeChat} setActiveChat={setActiveChat}/>

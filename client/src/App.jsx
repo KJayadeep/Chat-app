@@ -1,17 +1,23 @@
 import React from 'react'
+import {useContext} from "react"
 import Home from './pages/Home'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Profile from './pages/Profile'
 import Login from './pages/Login'
+import {Toaster} from "react-hot-toast"
+import { AuthContext } from '../context/AuthContext'
+
 
 const App = () => {
+
+  const {authUser} = useContext(AuthContext);
   return (
     <div >
+      <Toaster/>
       <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/profile' element={<Profile />} />
-
+        <Route path='/' element={authUser ? <Home /> : <Navigate to="/login" />} />
+        <Route path='/login' element={!authUser ? <Login /> : <Navigate to="/" />} />
+        <Route path='/profile' element={authUser ? <Profile /> : <Navigate to="/login" />} />
       </Routes>
     </div>
   )

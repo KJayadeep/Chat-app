@@ -1,10 +1,11 @@
 import User from "../models/user.js";
 import Message from "../models/message.js";
 import { uploader } from "../lib/cloudinary.js";
+import { io, userSocketMap } from "../server.js";
 
 //get all users except the logged in user
 
-export const getUsersForSisebar = async (req, res) => {
+export const getUsersForSidebar = async (req, res) => {
     try{
         const userId = req.user._id;
         const filteredUsers = await User.find({_id: {$ne: userId}}).select("-password");
@@ -23,6 +24,7 @@ export const getUsersForSisebar = async (req, res) => {
         res.json({success: false, message: "Error fetching users", error: error.message});
     }
 }
+export const getUsersForSisebar = getUsersForSidebar;
 
 //get all messages between two users
 
@@ -35,7 +37,7 @@ export const getMessages = async (req, res) => {
                 {senderId: myId, receiverId: selectedUserId},
                 {senderId: selectedUserId, receiverId: myId}
             ]
-        })
+        });
         await Message.updateMany({senderId: selectedUserId, receiverId: myId, seen: false}, {seen: true});
         res.json({success: true, messages});
     }
@@ -66,13 +68,20 @@ export const sendMessage = async (req, res) => {
         const senderId = req.user._id;
         let imageUrl = null;
         if(image){
-            const upload = await cloudinary.uploader.upload(image);
+            const upload = await uploader.upload(image);
             imageUrl = upload.secure_url;
         }
         const newMessage = await Message.create({senderId, receiverId, text, image: imageUrl});
+
+        const receiverSocketId = userSocketMap[receiverId];
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
+
         res.json({success: true, message: newMessage});
     }
     catch (error) {
         res.json({success: false, message: "Error sending message", error: error.message});
     }
 }
+

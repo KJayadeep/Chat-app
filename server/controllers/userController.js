@@ -8,7 +8,7 @@ import { uploader } from "../lib/cloudinary.js";
 export const signUp = async (req, res) => {
     const { name, email, password, bio } = req.body;
     try {
-        if(!name || !email || !password || !bio){
+        if(!name || !email || !password){
             return res.json({success: false, message: "All fields are required"});
         }
         const user = await User.findOne({email});
@@ -22,35 +22,41 @@ export const signUp = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            bio
+            bio: bio || "Hey there! I am using Chat App."
         });
 
+        const userObj = newUser.toObject();
+        delete userObj.password;
+
         const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-        res.json({success: true,userData: newUser, token, message: "User created successfully"});
+        res.json({success: true, user: userObj, userData: userObj, token, message: "User created successfully"});
 
     }
     catch (error) {
-        res.json({success: false, message: "Error creating user", error: error.message});
+        res.json({success: false, message: error.message || "Error creating user"});
     }
 }
 
 //login function
 export const login = async (req, res) =>{
     try{
-        const {email, passwotd} = req.body;
-        if(!email || !passwotd){
+        const {email, password} = req.body;
+        if(!email || !password){
             return res.json({success: false, message: "All fields are required"});
         }
         const user = await User.findOne({email});
         if(!user){
             return res.json({success: false, message: "User does not exist"});
         }
-        const isMatch = await bcrypt.compare(passwotd, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if(!isMatch){
             return res.json({success: false, message: "Invalid credentials"});
         }
+        const userObj = user.toObject();
+        delete userObj.password;
+
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-        res.json({success: true, userData: user, token, message: "User logged in successfully"});
+        res.json({success: true, user: userObj, userData: userObj, token, message: "User logged in successfully"});
     }
     catch (error) {
         res.json({success: false, message: "Error logging in user", error: error.message});
@@ -65,14 +71,15 @@ export const checkAuth = async (req, res) => {
 //update user profile function
 export const updateProfile = async (req, res) => {
     try{
-        const {name, bio, profilepic} = req.body;
+        const {name, bio, profilepic, avatar} = req.body;
+        const imageToUpload = profilepic || avatar;
         let updatedUser;
 
-        if(!profilepic){
-            updatedUser = await User.findByIdAndUpdate(req.user._id, {name, bio}, {new: true});
+        if(!imageToUpload){
+            updatedUser = await User.findByIdAndUpdate(req.user._id, {name, bio}, {new: true}).select("-password");
         }else{
-                const upload = await uploader.upload(profilepic);
-                updatedUser = await User.findByIdAndUpdate(req.user._id, {name, bio, profilepic: upload.secure_url}, {new: true});
+            const upload = await uploader.upload(imageToUpload);
+            updatedUser = await User.findByIdAndUpdate(req.user._id, {name, bio, profilepic: upload.secure_url}, {new: true}).select("-password");
         }
         res.json({success: true, user: updatedUser, message: "User profile updated successfully"});
     }
@@ -80,3 +87,4 @@ export const updateProfile = async (req, res) => {
         res.json({success: false, message: "Error updating user profile", error: error.message});
     }
 }
+

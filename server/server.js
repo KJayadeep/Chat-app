@@ -50,7 +50,7 @@ app.use("/api/messages", messageRoutes);
 //connect to the database
 await connectDB();
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8001;
 // Start the server and listen on the specified port
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
